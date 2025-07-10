@@ -1,0 +1,7 @@
+body {
+  font-family: 'Inter', sans-serif !important;
+}
+
+.login-button:hover{
+  background-color: #C69749 !important;
+}
