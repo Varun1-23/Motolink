@@ -1,5 +1,5 @@
 import express from 'express'
-import { cancelRequest, createServiceRequest, getAllServiceRequest, getRequestsForShop, getUserRequests, updateRequestStatus } from '../controllers/serviceRequest.controller'
+import { cancelRequest, createServiceRequest, getAllServiceRequest, getRequestsForShop, getUserRequests, updateRequestStatus } from '../controllers/serviceRequest.controller.js'
 
 
 

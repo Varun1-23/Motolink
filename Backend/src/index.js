@@ -13,6 +13,7 @@ import districtRoutes from './routes/district.routes.js'
 import locationRoutes from './routes/location.routes.js'
 import serviceRequestRoutes from './routes/serviceRequest.routes.js'
 import customerRoutes from './routes/customer.routes.js'
+import cookieParser from 'cookie-parser'
 
 dotenv.config()
 
@@ -21,6 +22,7 @@ const app = express()
 //middleware 
 
 app.use(express.json())
+app.use(cookieParser())
 app.use(cors({
     origin: ['http://localhost:5173' , 'http://localhost:5174' ],
     credentials: true

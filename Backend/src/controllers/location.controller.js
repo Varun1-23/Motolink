@@ -6,16 +6,17 @@ import { asyncHandler } from '../utils/asyncHandler.js'
 export const addLocation = asyncHandler(async(req , res) => {
 try {
             const { name , districtId , StateId} = req.body
-    
+            console.log(req.body);
+            
             if(!name || !districtId || !StateId){
                 throw new ApiError(400, 'all fields are required')
             }
     
-            const location = await Location.create({ name, state: StateId, district: districtId })
+            const location = await Location.create({ name, StateId: StateId, districtId: districtId })
     
             return res
                    .status(200)
-                   .json(new ApiResponse(200 , location , 'location added successfully')) 
+                   .json(new ApiResponse(200 , {name: location.name, StateId: location.StateId, districtId:location.districtId} , 'location added successfully')) 
 } catch (error) {
     console.error(error);
     throw new ApiError(500, 'internal server error')
@@ -25,8 +26,8 @@ try {
 
 export const getLocation = asyncHandler(async(req , res)=> {
     try {
-        const { districtId , StateId } = req.params
-        const location = await Location.find({districtId: districtId , StateId: StateId})
+        
+        const location = await Location.find()
         .populate('districtId' , 'name')
         .populate('StateId' , 'name')
 

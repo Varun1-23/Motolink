@@ -1,14 +1,32 @@
 import React, { useState } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import '../Styles/LoginPage.css';
+import api from '../services/api';
+import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
 
 function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const[formData , setFormData] = useState({email: '', password: ''});
 
-  const handleLogin = (e) => {
+  const navigate = useNavigate()
+
+  const handleChange = (e) => {
+    setFormData({...formData, [e.target.name]: e.target.value});
+  }
+  const handleLogin = async (e) => {
     e.preventDefault();
-    console.log('Email:', email, 'Password:', password);
+try {
+      const res = await api.post('/admin/login', formData)
+      console.log('Response:', res.data.data);
+      if(res.data.data.role === 'admin'){
+        toast.success('admin logged in');
+        navigate('/dashboard')
+      }
+      else{
+        toast.error('invalid credentials')
+      }
+} catch (error) {
+  toast.error('login failed') 
+}
   };
 
   return (
@@ -85,8 +103,10 @@ function LoginPage() {
               <div className="mb-3 d-flex justify-content-center">
                 <input
                   type="email"
+                  autoComplete='email'
                   className="form-control border-0"
                   placeholder="Email"
+                  name='email'
                   style={{
                     width: '100%',
                     maxWidth: '370px',
@@ -96,14 +116,14 @@ function LoginPage() {
                     paddingLeft: '10px',
                     color: '#000',
                   }}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={handleChange}
                   required
                 />
               </div>
               <div className="mb-4 d-flex justify-content-center">
                 <input
                   type="password"
+                  autoComplete='password'
                   className="form-control border-0"
                   placeholder="Password"
                   style={{
@@ -116,8 +136,8 @@ function LoginPage() {
                     color: '#000',
                     marginBottom: '35px'
                   }}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  name='password'
+                  onChange={handleChange}
                   required
                 />
               </div>

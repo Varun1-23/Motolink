@@ -1,5 +1,5 @@
 import express from 'express'
-import { adminLogin, adminLogout, getAdminDashboardStats, softDeleteReview } from '../controllers/admin.controller'
+import { adminLogin, adminLogout, getAdminDashboardStats, softDeleteReview } from '../controllers/admin.controller.js'
 
 
 

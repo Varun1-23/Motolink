@@ -19,15 +19,15 @@ function Navbar() {
         </li>
         {[
           'Dashboard',
-          'Locations',
           'States',
+          'Districts',
+          'Locations',
           'Shops',
           'Customers',
           'Services',
           'Feedbacks',
           'Category',
           'Reports',
-          'Districts',
         ].map((item) => (
           <li key={item} className="nav-item">
             <NavLink

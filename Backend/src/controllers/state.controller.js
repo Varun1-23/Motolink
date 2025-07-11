@@ -27,7 +27,7 @@ try {
             const states = await State.find()
             return res
                    .status(200)
-                   .json(new ApiResponse(200, states, 'states fetched')) 
+                   .json(new ApiResponse(200, {states}, 'states fetched')) 
 } catch (error) {
     console.error(error);
     throw new ApiError(500, 'internal server error')

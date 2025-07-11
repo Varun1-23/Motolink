@@ -18,9 +18,9 @@ function App() {
     <>
     <Routes>
      <Route path='/dashboard' element={<AdminDashboardPage/>} />
-     <Route path='/location' element={<LocationPage/>}/>
-     <Route path='/district' element={<DistrictPage/>}/>
-     <Route path='/state' element={<StatePage/>}/>
+     <Route path='/locations' element={<LocationPage/>}/>
+     <Route path='/districts' element={<DistrictPage/>}/>
+     <Route path='/states' element={<StatePage/>}/>
      <Route path='/' element={<LoginPage/>}/> 
     </Routes>
     </>

@@ -41,7 +41,7 @@ export const adminLogin = asyncHandler(async(req, res)=>{
 
     return res
            .status(200)
-           .json(new ApiResponse(200 , { token } , 'admin fetched successfully')) 
+           .json(new ApiResponse(200 , { adminId: admin._id , email: admin.email , role:'admin' } , 'admin fetched successfully')) 
         } catch (error) {
             console.error(error);
             throw new ApiError(500, 'internal server error')

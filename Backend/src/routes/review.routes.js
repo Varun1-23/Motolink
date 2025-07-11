@@ -1,5 +1,5 @@
 import express from 'express'
-import { addReview, deleteReview, getShopReviews, updateReview } from '../controllers/review.controller'
+import { addReview, deleteReview, getShopReviews, updateReview } from '../controllers/review.controller.js'
 
 
 
