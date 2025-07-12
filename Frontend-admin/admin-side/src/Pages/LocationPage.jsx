@@ -11,21 +11,35 @@ function LocationPage() {
     districtId: '',
   });
   const[locations , setLocations] = useState([]) 
-  const[districts , setDistricts] = useState([]) 
+  const[filteredDistricts , setFilteredDistricts] = useState([])
   const [states, setStates] = useState([]);
+  const [edit , setEdit] = useState(null)
+  const [loading , setLoading] = useState(true)
 
+  const fetchDistrictByState = async (StateId) => {
+      try {
+        const res = await api.get(`/district/get/${StateId}`);
+        setFilteredDistricts(res.data.data) 
+      } catch (error) {
+        toast.error('failed to fetch')
+      }
+      finally{
+        setLoading(false)
+      }
+  }
+
+ 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });  
+
+  if(name === 'StateId'){
+      setFormData((prev) => ({...prev, districtId: '', StateId: value }))
+      fetchDistrictByState(value)
+      }
   };
 
-  const fetchDistricts = async () => {
-    try {
-      const res = await api.get('/district/get')
-      setDistricts(res.data.data.districts)
-    } catch (error) {
-      toast.error('failed to fetch district')
-    }
-  }
+
 
   const fetchLocations = async () => {
     try {
@@ -34,6 +48,9 @@ function LocationPage() {
       setLocations(res.data.data)
     } catch (error) {
       toast.error('failed to fetch locations')
+    }
+    finally{
+      setLoading(false)
     }
   }
 
@@ -44,25 +61,60 @@ function LocationPage() {
     } catch (error) {
       toast.error('failed to fetch states')
     }
+    finally{
+      setLoading(false)
+    }
   }
   
   useEffect(()=> {
+    const timeOut = setTimeout(() => {
     fetchStates()
-    fetchDistricts()
     fetchLocations()
+    }, 10)
+    return () => clearTimeout(timeOut)
   }, [])
   const handleAdd = async (e) => {
     e.preventDefault();
     try {
+        if(edit){
+        const res = await api.put(`/location/${edit}`, formData)
+        toast.success('location updated')
+        setEdit(null)
+        fetchLocations()
+        setFormData({name:'', StateId:'' , districtId: '' })
+        }else{
       const response = await api.post('/location/add', formData);
       console.log('Response:', response.data.data);
       toast.success('District Added Successfully');
       setFormData({ name: '', StateId: '', districtId: '' });
       fetchLocations()
-    } catch (error) {
+    }
+   } catch (error) {
       toast.error('Failed to add Location');
+    
     }
   };
+
+  const handleEdit = async (location) =>  {
+      setFormData({ name: location.name , StateId: location.StateId  , districtId: location.districtId });
+      setEdit(location._id)
+  }
+
+  const handleCancelEdit = async () => {
+    setFormData({ name: '', StateId: '' , districtId: ''})
+    setEdit(null)
+  }
+
+  const handleDelete = async(locationId) => {
+      try {
+        const res = await api.delete(`/district/${locationId}`)
+        toast.error('deleted successfully')
+        fetchLocations()
+      } catch (error) {
+        toast.error('failed to delete')
+      }
+  }
+
 
   return (
     <div className="d-flex flex-column flex-md-row" style={{ backgroundColor: '#000000', minHeight: '100vh' }}>
@@ -70,9 +122,15 @@ function LocationPage() {
       <div className="flex-shrink-0">
         <Sidebar />
       </div>
-
+    {loading ? (
+        <div className='text-white text-center mt-5' style={{ marginLeft: '100px'}}>
+        <div className='spinner-border text-light text-center' role='status'></div>
+        <div>Loading Locations....</div>
+        </div>
+    ): (
+    <div className="flex-grow-1 p-3 p-md-5">
       {/* Main Content */}
-      <div className="flex-grow-1 p-3 p-md-5">
+ 
         <div className="bg-opacity-50 p-4 rounded-4 w-100" style={{ backdropFilter: 'blur(6px)', fontFamily: 'Jura' }}>
           
           {/* Header Row */}
@@ -82,6 +140,40 @@ function LocationPage() {
 
           {/* Form Row */}
           <form onSubmit={handleAdd} className="d-flex justify-content-center align-items-center flex-wrap gap-3 mb-5">
+
+             {/* State Dropdown */}
+             <select 
+             name="StateId"
+             value={formData.StateId}
+             className='form-select'
+             required
+             onChange={handleChange}
+             style={{width: '200px'}}
+             >
+              <option value="" disabled>Select State</option>
+              {states.map((state) => (
+                <option key={state._id} value={state._id}>{state.name}</option>
+              ))}
+             </select>
+
+              
+            
+            {/* District Dropdown */}
+             <select 
+             name="districtId"
+             value={formData.districtId}
+             className='form-select'
+             required
+             onChange={handleChange}
+             style={{width: '200px'}}
+             >
+              <option value="" disabled>Select District</option>
+              {filteredDistricts.map((district) => (
+                <option key={district._id} value={district._id}>{district.name}</option>
+              ))}
+             </select>
+
+
             {/* Centered Input */}
             <input
               type="text"
@@ -95,35 +187,6 @@ function LocationPage() {
               style={{ width: '250px' }}
             />
 
-             {/* State Dropdown */}
-             <select 
-             name="StateId"
-             value={formData.StateId}
-             className='form-select'
-             required
-             onChange={handleChange}
-             style={{width: '200px'}}
-             >
-              <option value="">Select State</option>
-              {states.map((state) => (
-                <option key={state._id} value={state._id}>{state.name}</option>
-              ))}
-             </select>
-
-              {/* District Dropdown */}
-             <select 
-             name="districtId"
-             value={formData.districtId}
-             className='form-select'
-             required
-             onChange={handleChange}
-             style={{width: '200px'}}
-             >
-              <option value="">Select District</option>
-              {districts.map((district) => (
-                <option key={district._id} value={district._id}>{district.name}</option>
-              ))}
-             </select>
 
             {/* Button on right */}
             <button
@@ -136,8 +199,16 @@ function LocationPage() {
                 fontSize: '18px',
               }}
             >
-              Add 
+              {edit ? 'Update' : 'Add'}
             </button>
+             {edit && (
+              <button
+              onClick={handleCancelEdit}
+              className='btn btn-outline-light'
+              >
+                Cancel
+              </button>
+            )}
           </form>
 
           {/* Table Section */}
@@ -159,8 +230,8 @@ function LocationPage() {
                         <td>{location.StateId?.name || 'N/A'}</td>
                         <td>{location.districtId?.name || 'N/A'}</td>
                         <td>
-                          <button className='btn btn-secondary me-2'>Edit</button>
-                          <button className='btn custom-btn ' style={{backgroundColor: '#1B1D2C', color: 'white'}} >Delete</button>
+                          <button className='btn btn-secondary me-2' onClick={() => handleEdit(location)}>Edit</button>
+                          <button className='btn custom-btn ' style={{backgroundColor: '#1B1D2C', color: 'white'}} onClick={() => handleDelete(location._id)}>Delete</button>
                         </td>
                       </tr>
                   ))}
@@ -171,6 +242,7 @@ function LocationPage() {
 
         </div>
       </div>
+      )}
     </div>
   );
 }

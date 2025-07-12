@@ -4,6 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import Review from '../models/review.models.js'
 
+
 export const getMechanicProfile = asyncHandler(async(req , res) => {
 try {
         const user = await mechanicShop.findById(req.user.id).select('-password')
@@ -19,6 +20,30 @@ try {
     throw new ApiError(500, 'internal server error')
 }
 }) 
+
+export const getAllMechanicProfiles = asyncHandler(async(req, res)=> {
+    try {
+        const users = await mechanicShop.find({isApproved: 'false'}).populate({
+            path: 'location',
+            populate: [
+                {path: 'StateId', select: 'name'},
+                {path: 'districtId', select: 'name'}
+            ],
+            select: 'name StateId districtId'    
+        }).select('-password')
+        
+        if(!users){
+            throw new ApiError(404, "users not found")
+        }
+
+        return res
+               .status(200)
+               .json(new ApiResponse(200 , users , 'Fetched')) 
+    } catch (error) {
+        console.error(error);
+        throw new ApiError(500, 'internal server error')
+    }
+})
 
 
 export const updateMechanicProfile = asyncHandler(async(req, res)=> {
@@ -96,4 +121,45 @@ export const filteredShops = asyncHandler(async (req , res)=> {
         console.error(error);
         throw new ApiError(500, 'internal server error')
     }
+})
+
+export const approveShop = asyncHandler(async(req , res) => {
+    try {
+        const {shopId} = req.params 
+        const shops = await mechanicShop.findByIdAndUpdate(shopId , {isApproved: true} , {new: true, runValidators: true})
+
+        if(!shops){
+            throw new ApiError(404, 'shop not found')
+        }
+        return res
+               .status(200)
+               .json(new ApiResponse(200 , shops , 'approved successfully')) 
+    } catch (error) {
+        console.error(error);
+        throw new ApiError(500, 'internal server error')
+    }
+})
+
+export const adminApprovedShops = asyncHandler(async(req , res)=> {
+try {
+        const shops = await mechanicShop.find({isApproved: true , isBlocked: false}).populate({
+            path: 'location' ,
+            populate: [
+                {path: 'StateId', select: 'name'},
+                {path: 'districtId', select: 'name'}
+            ],
+            select: 'name StateId districtId' 
+        }).select('-password')
+    
+        if(!shops){
+            throw new ApiError(404, 'no shops found')
+        }
+    
+        return res
+               .status(200)
+               .json(new ApiResponse(200, shops, 'admin approved shops'))
+} catch (error) {
+    console.error(error);
+    throw new ApiError(500, 'internal server error')
+}
 })

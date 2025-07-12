@@ -10,7 +10,7 @@ const isProduction = process.env.NODE_ENV === 'production'
 
 export const registerUser = asyncHandler (async (req, res) => {
     try {
-        const { email , password , shopName , ownerName , phone , address, vehicleTypes  } = req.body
+        const { email , password , shopName , ownerName , phone , address, vehicleTypes , location , StateId , districtId } = req.body
 
         const existingUser = await MechanicShop.findOne ({ email })
         if(existingUser){
@@ -18,7 +18,7 @@ export const registerUser = asyncHandler (async (req, res) => {
         }
 
         const hashed = await bcrypt.hash(password, 10)
-        const user = await MechanicShop.create({ ownerName, email, password: hashed, shopName, phone, address, vehicleTypes  }) 
+        const user = await MechanicShop.create({ ownerName, email, password: hashed, shopName, phone, address, vehicleTypes , location , StateId , districtId }) 
 
         return res
                .status(200)
@@ -31,7 +31,9 @@ export const registerUser = asyncHandler (async (req, res) => {
                 address: user.phone,
                 address: user.address,
                 vehicleTypes: user.vehicleTypes,
-                
+                location: user.location,
+                StateId: user.StateId,
+                districtId: user.districtId,
                } , 'User Registered successfully')) 
     } catch (error) {
         console.error(error);

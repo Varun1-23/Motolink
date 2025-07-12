@@ -9,6 +9,8 @@ function StatePage() {
     name: ''
   });
   const[states , setStates] = useState([]) 
+  const[edit, setEdit] = useState(null)
+  const [loading , setLoading] = useState(true)
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -21,23 +23,61 @@ function StatePage() {
     } catch (error) {
       toast.error('failed to fetch state')
     }
+    finally{
+      setLoading(false)
+    }
   }
   
   useEffect(()=> {
-    fetchStates()
+    const timeOut = setTimeout(() => {
+      fetchStates()
+    }, 10);
+    return () => clearTimeout(timeOut);
   }, [])
+
   const handleAdd = async (e) => {
     e.preventDefault();
     try {
+      if(edit){
+        const res = await api.put(`/state/${edit}`, formData)
+        console.log(res.data.data);
+        toast.success('updated successfully')
+        setEdit(null)
+        fetchStates()
+        setFormData({ name: ''})
+      }
+      else{
       const response = await api.post('/state/add', formData);
       console.log('Response:', response.data.data);
       toast.success('State Added Successfully');
       setFormData({ name: '' })
       fetchStates()
+      }
     } catch (error) {
       toast.error('Failed to add state');
     }
   };
+
+  const handleDelete = async (stateId) => {
+    if(!window.confirm('Are u sure to delete?')) return
+      try {
+        const res = await api.delete(`/state/${stateId}`)
+        toast.success('state deleted')
+        fetchStates()
+      } catch (error) {
+        toast.error('Failed')
+      }
+  }
+
+  const handleEdit =  (state) => {
+    setFormData({ name: state.name})
+    setEdit(state._id)
+  }
+
+  const handleCancelEdit =  (state) => {
+    setFormData({ name: ''})
+    setEdit(null)
+  }
 
   return (
     <div className="d-flex flex-column flex-md-row" style={{ backgroundColor: '#000000', minHeight: '100vh' }}>
@@ -45,9 +85,15 @@ function StatePage() {
       <div className="flex-shrink-0">
         <Sidebar />
       </div>
-
-      {/* Main Content */}
+    {loading ?  (
+      <div className='text-white text-center mt-5' style={{ marginLeft: '100px'}}>
+        <div className='spinner-border text-light text-center' role='status'></div>
+        <div>Loading States....</div>
+      </div>
+    ): (
       <div className="flex-grow-1 p-3 p-md-5">
+      {/* Main Content */}
+      
         <div className="bg-opacity-50 p-4 rounded-4 w-100" style={{ backdropFilter: 'blur(6px)', fontFamily: 'Jura' }}>
           
           {/* Header Row */}
@@ -81,8 +127,16 @@ function StatePage() {
                 fontSize: '18px',
               }}
             >
-              Add 
+             { edit ? 'Update' : 'Add' }
             </button>
+            {edit && (
+              <button
+              onClick={handleCancelEdit}
+              className='btn btn-outline-light'
+              >
+                Cancel
+              </button>
+            )}
           </form>
 
           {/* Table Section */}
@@ -100,7 +154,7 @@ function StatePage() {
                       <tr key={state._id}>
                         <td>{state.name}</td>
                         <td>
-                          <button className='btn btn-secondary me-2'>Edit</button>
+                          <button className='btn btn-secondary me-2' onClick={() => handleEdit(state)}>Edit</button>
                           <button className='btn custom-btn ' style={{backgroundColor: '#1B1D2C', color: 'white'}} onClick={() => handleDelete(state._id)}>Delete</button>
                         </td>
                       </tr>
@@ -112,6 +166,7 @@ function StatePage() {
 
         </div>
       </div>
+    )}
     </div>
   );
 }

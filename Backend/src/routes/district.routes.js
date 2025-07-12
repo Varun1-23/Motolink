@@ -7,7 +7,7 @@ const router = express.Router()
 
 
 router.post('/add', addDistrict )
-router.get('/getByState', verifyAdmin, getDistrcitsByState )
+router.get('/get/:stateId', verifyAdmin, getDistrcitsByState )
 router.get('/get', verifyAdmin, getAllDistricts )
 router.put('/:districtId', verifyAdmin, updateDistricts )
 router.delete('/:districtId', verifyAdmin, deleteDistricts )

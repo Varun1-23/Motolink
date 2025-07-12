@@ -42,6 +42,19 @@ export const getLocation = asyncHandler(async(req , res)=> {
     }
 })
 
+export const getLocationByDistrict = asyncHandler(async(req , res)=> {
+    try {
+        const { districtId } = req.params
+        const location = await Location.find({ districtId: districtId })
+        return res
+               .status(200)
+               .json(new ApiResponse(200, location, 'fetched successfully')) 
+    } catch (error) {
+        console.error(error);
+        throw new ApiError(500, 'internal server error')
+    }
+})
+
 export const updateLocation = asyncHandler(async(req , res)=> {
    try {
      const { locationId } = req.params

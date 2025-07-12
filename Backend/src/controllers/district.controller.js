@@ -25,7 +25,7 @@ export const getDistrcitsByState = asyncHandler(async( req , res)=> {
 
   try {
       const { stateId } = req.params
-  
+
       const district = await District.find({ stateId: stateId})
       return res
              .status(200)
@@ -41,7 +41,7 @@ export const getAllDistricts = asyncHandler(async (req, res) => {
     const districts = await District.find().populate('stateId', 'name');
     return res
       .status(200)
-      .json(new ApiResponse(200, { districts }, 'all districts fetched'));
+      .json(new ApiResponse(200,  {districts} , 'all districts fetched'));
   } catch (error) {
     console.error(error);
     throw new ApiError(500, 'internal server error');
@@ -55,17 +55,12 @@ export const updateDistricts = asyncHandler(async(req , res)=> {
     
         const { name , stateId } = req.body
         
-        const district = await District.findById(districtId)
+        const district = await District.findByIdAndUpdate(districtId, { name , stateId: stateId}, {new: true , runValidators: true})
     
         if(!district){
             throw new ApiError(404, 'not found')
         }
-    
-        if(name) district.name = name
-        if(stateId) district.stateId = stateId
-    
-        await district.save()
-    
+       
         return res
                .status(200)
                .json(new ApiResponse(200 , district , 'updated')) 
@@ -81,11 +76,7 @@ export const deleteDistricts = asyncHandler(async(req , res)=> {
     try {
         const { districtId } = req.params
     
-        const district = await District.findById(districtId)
-    
-        await district.remove()
-        District.save()
-    
+        const district = await District.findByIdAndDelete(districtId)
         return res
                .status(200)
                .json(new ApiResponse(200, null , 'deleted')) 

@@ -39,15 +39,12 @@ export const updateState = asyncHandler(async(req , res)=> {
         const { stateId } = req.params
         const { name } = req.body
     
-        const state = await State.findById( stateId )
+        const state = await State.findByIdAndUpdate( stateId , { name } , { new: true, runValidators: true} )
     
         if(!state){
             throw new ApiError(404, 'state not found')
         }
     
-        if(name) state.name = name
-    
-        await State.Save()
     
         return res
                .status(200)
@@ -62,18 +59,15 @@ export const deleteState = asyncHandler(async(req , res) => {
    try {
      const { stateId } = req.params
  
-     const state = await State.findById(stateId)
+     const state = await State.findByIdAndDelete(stateId)
  
      if(!state){
          throw new ApiError(404, 'state is not found')
      }
  
-     state.remove()
-     await state.save()
- 
      return res
             .status(200)
-            .json(new ApiResponse(200, state , 'state is deleted')) 
+            .json(new ApiResponse(200, null , 'state is deleted')) 
    } catch (error) {
     console.error(error);
     throw new ApiError(500, 'internal server error')
